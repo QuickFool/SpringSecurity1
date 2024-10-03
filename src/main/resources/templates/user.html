@@ -1,11 +1,31 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<html lang="en">
 <head>
-    <title>User Page</title>
+    <meta charset="UTF-8">
+    <title>User info</title>
 </head>
 <body>
-<h2>Welcome, User!</h2>
-<p>You have access to user resources.</p>
-<a th:href="@{/logout}">Logout</a>
+<h1>Добро пожаловать на вашу личную страницу!</h1>
+<h2>Ваши пользовательские данные</h2>
+<b>ID:</b>
+<p th:text="${user.getId()}">ID</p>
+<b>NAME:</b>
+<p th:text="${user.getName()}">NAME</p>
+<b>SURNAME:</b>
+<p th:text="${user.getSurname()}">SURNAME</p>
+<b>AGE:</b>
+<p th:text="${user.getAge()}">AGE</p>
+<b>USERNAME:</b>
+<p th:text="${user.getUsername()}">USERNAME</p>
+<b>PASSWORD:</b>
+<p th:text="${user.getPassword()}">PASSWORD</p>
+<b>ROLES:</b>
+<p th:text="${user.getRoles()}">ROLES</p>
+
+<form th:attr="action=@{/logout}">
+    <input type="submit" value="LOGOUT"/>
+</form>
+
 </body>
 </html>

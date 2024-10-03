@@ -4,7 +4,12 @@
     <title>Spring Security Example</title>
 </head>
 <body>
-<h1>Welcome to Index PAGE!</h1>
+<h1>Добро пожаловать в Spring Security приложение</h1>
+
+Для продолжения пожалуйста пройдите авторизацию
+<form th:attr="action=@{/login}">
+    <input type="submit" value="Авторизация"/>
+</form>
 
 
 </body>

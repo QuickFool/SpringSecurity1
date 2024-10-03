@@ -1,27 +1,22 @@
-package ru.kata.spring.boot_security.demo.details;
+package ru.kata.spring.boot_security.demo.security;
 
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import ru.kata.spring.boot_security.demo.models.User;
 
 import java.util.Collection;
-import java.util.Set;
-import java.util.stream.Collectors;
 
-public class CustomUserDetails implements UserDetails {
-
+public class UserDetailsImpl implements UserDetails {
 
     private final User user;
 
-    public CustomUserDetails(User user) {
+    public UserDetailsImpl(User user) {
         this.user = user;
     }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return user.getRoles().stream()
-                .map(role -> (GrantedAuthority) role::getName)
-                .collect(Collectors.toSet());
+        return user.getRoles();
     }
 
     @Override
@@ -52,5 +47,9 @@ public class CustomUserDetails implements UserDetails {
     @Override
     public boolean isEnabled() {
         return true;
+    }
+
+    public User getUser() {
+        return this.user;
     }
 }
