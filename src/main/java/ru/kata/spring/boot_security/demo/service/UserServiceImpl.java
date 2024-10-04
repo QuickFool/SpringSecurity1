@@ -4,11 +4,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.kata.spring.boot_security.demo.models.Role;
 import ru.kata.spring.boot_security.demo.models.User;
 import ru.kata.spring.boot_security.demo.repository.UserRepository;
 
+import javax.annotation.PostConstruct;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Service
 @Transactional(readOnly = true)
@@ -55,4 +58,24 @@ public class UserServiceImpl implements UserService {
     public void delete(Long id) {
         userRepository.deleteById(id);
     }
+
+    @PostConstruct
+    public void loadTestUsers() {
+        if (userRepository.count() == 0) {
+            // Создаем тестовых пользователей
+            User admin = new User();
+            admin.setUsername("admin");
+            admin.setPassword(passwordEncoder.encode("adminpass"));
+            admin.setRoles(Set.of(new Role("ROLE_ADMIN")));
+
+            User user = new User();
+            user.setUsername("user");
+            user.setPassword(passwordEncoder.encode("userpass"));
+            user.setRoles(Set.of(new Role("ROLE_USER")));
+
+            userRepository.save(admin);
+            userRepository.save(user);
+        }
+    }
+
 }
