@@ -9,7 +9,7 @@ public interface UserService {
 
     User findOne(Long id);
 
-    User findByUsername(String username);  // Новый метод для поиска пользователя по имени
+    User findByUsername(String username);  //поиск пользователя по имени
 
     boolean save(User user);
 
