@@ -9,6 +9,8 @@ public interface UserService {
 
     User findOne(Long id);
 
+    User findByUsername(String username);  // Новый метод для поиска пользователя по имени
+
     boolean save(User user);
 
     void update(Long id, User updatedUser);
