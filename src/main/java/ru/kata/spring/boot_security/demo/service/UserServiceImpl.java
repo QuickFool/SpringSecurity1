@@ -4,20 +4,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.kata.spring.boot_security.demo.models.Role;
 import ru.kata.spring.boot_security.demo.models.User;
-import ru.kata.spring.boot_security.demo.repository.RoleRepository;
 import ru.kata.spring.boot_security.demo.repository.UserRepository;
 import org.hibernate.Hibernate;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
-import javax.persistence.EntityManager;
 import javax.persistence.EntityNotFoundException;
-import javax.persistence.PersistenceContext;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 @Service
 @Transactional(readOnly = true)
@@ -27,7 +20,7 @@ public class UserServiceImpl implements UserService {
     private final PasswordEncoder passwordEncoder;
 
     @Autowired
-    public UserServiceImpl(UserRepository userRepository, PasswordEncoder passwordEncoder, RoleRepository roleRepository) {
+    public UserServiceImpl(UserRepository userRepository, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
     }
@@ -37,36 +30,36 @@ public class UserServiceImpl implements UserService {
     public List<User> findAll() {
         List<User> users = userRepository.findAll();
         for (User user : users) {
-            Hibernate.initialize(user.getRoles());  // Инициализация ролей для каждого пользователя
+            Hibernate.initialize(user.getRoles());
         }
         return users;
     }
 
+    @Override
     @Transactional(readOnly = true)
     public User findOne(Long id) {
-        Optional<User> userOptional = userRepository.findById(id);
-        if (userOptional.isPresent()) {
-            User user = userOptional.get();
-            Hibernate.initialize(user.getRoles());  // Инициализация ленивой коллекции
-            return user;
-        }
-        return null;
+        return userRepository.findById(id)
+                .map(user -> {
+                    Hibernate.initialize(user.getRoles());
+                    return user;
+                })
+                .orElseThrow(() -> new EntityNotFoundException("User with id " + id + " not found"));
     }
 
     @Override
     @Transactional(readOnly = true)
     public User findByUsername(String username) {
         User user = userRepository.findByUsernameWithRoles(username);
-        Hibernate.initialize(user.getRoles());
+        if (user != null) {
+            Hibernate.initialize(user.getRoles());
+        }
         return user;
     }
-
 
     @Override
     @Transactional
     public boolean save(User user) {
-        Optional<User> optionalUser = userRepository.findByUsername(user.getUsername());
-        if (optionalUser.isPresent()) {
+        if (userRepository.findByUsername(user.getUsername()).isPresent()) {
             return false;
         }
         user.setPassword(passwordEncoder.encode(user.getPassword()));
@@ -77,11 +70,12 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public void update(Long id, User updatedUser) {
-        if (!userRepository.existsById(id)) {
-            throw new EntityNotFoundException("User with id " + id + " not found");
-        }
+        User existingUser = findOne(id);
+
         updatedUser.setId(id);
-        updatedUser.setPassword(passwordEncoder.encode(updatedUser.getPassword()));
+        if (!updatedUser.getPassword().equals(existingUser.getPassword())) {
+            updatedUser.setPassword(passwordEncoder.encode(updatedUser.getPassword()));
+        }
         userRepository.save(updatedUser);
     }
 
@@ -91,10 +85,10 @@ public class UserServiceImpl implements UserService {
         userRepository.deleteById(id);
     }
 
+    // Метод для инициализации ролей (ленивая загрузка)
     private void initializeRoles(User user) {
         if (user != null) {
             Hibernate.initialize(user.getRoles());
         }
     }
-
 }

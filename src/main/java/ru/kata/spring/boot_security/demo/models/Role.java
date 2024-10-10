@@ -4,6 +4,7 @@ import org.springframework.security.core.GrantedAuthority;
 
 import javax.persistence.*;
 import java.util.Objects;
+import java.util.Set;
 
 @Entity
 @Table(name = "role")
@@ -18,6 +19,8 @@ public class Role implements GrantedAuthority {
 
     public Role() {
     }
+    @ManyToMany(fetch = FetchType.LAZY, mappedBy = "roles")
+    private Set<User> users;
 
     // Конструктор с ID
     public Role(Long id) {
